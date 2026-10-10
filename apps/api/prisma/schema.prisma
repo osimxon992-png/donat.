@@ -1,0 +1,610 @@
+// Donat — game top-up store schema.
+// Money is always stored as integer minor units (e.g. cents) in *Minor columns.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum OrderStatus {
+  CREATED
+  AWAITING_PAYMENT
+  PAID
+  QUEUED
+  PROCESSING
+  FULFILLED
+  FAILED
+  MANUAL_REVIEW
+  REFUND_PENDING
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  EXPIRED
+  REFUNDED
+}
+
+enum TransactionType {
+  CHARGE
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum FulfillmentAttemptStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  UNKNOWN
+}
+
+enum ProviderType {
+  MOCK
+  AUTHORIZED_HTTP
+}
+
+enum ProviderHealth {
+  UNKNOWN
+  HEALTHY
+  DEGRADED
+  DOWN
+}
+
+enum PricingMode {
+  FIXED
+  MARKUP
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum WebhookEventStatus {
+  RECEIVED
+  PROCESSED
+  IGNORED
+  FAILED
+}
+
+enum TicketStatus {
+  OPEN
+  AWAITING_CUSTOMER
+  AWAITING_SUPPORT
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum PromotionType {
+  PERCENT
+  FIXED
+}
+
+// ───────────────────────────── Identity ─────────────────────────────
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions String[]
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+}
+
+model User {
+  id               String     @id @default(cuid())
+  email            String     @unique
+  passwordHash     String
+  name             String
+  phone            String?
+  status           UserStatus @default(ACTIVE)
+  roleId           String
+  role             Role       @relation(fields: [roleId], references: [id])
+  marketingOptIn   Boolean    @default(false)
+  failedLoginCount Int        @default(0)
+  lockedUntil      DateTime?
+  lastLoginAt      DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  sessions            Session[]
+  passwordResetTokens PasswordResetToken[]
+  orders              Order[]
+  savedPlayers        SavedPlayer[]
+  supportTickets      SupportTicket[]
+  ticketMessages      SupportTicketMessage[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  redemptions         PromotionRedemption[]
+  refundsRequested    Refund[]
+
+  @@index([createdAt])
+}
+
+/// Refresh-token sessions. The token is rotated on every refresh; presenting an
+/// already-rotated token (outside a short grace window) revokes the session.
+model Session {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash         String    @unique
+  previousTokenHash String?   @unique
+  userAgent         String?
+  ip                String?
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  rotatedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  lastUsedAt        DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ───────────────────────────── Catalogue ─────────────────────────────
+
+model Game {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  publisher       String?
+  description     String?
+  imageUrl        String?
+  /// Storefront section: games | services | mobile (see CATALOG_CATEGORIES in @donat/shared).
+  category        String   @default("games")
+  currencyName    String   @default("Credits")
+  playerIdLabel   String   @default("Player ID")
+  playerIdPattern String   @default("^[0-9]{5,15}$")
+  playerIdHelp    String?
+  requiresServer  Boolean  @default(false)
+  servers         String[]
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  products     Product[]
+  orders       Order[]
+  savedPlayers SavedPlayer[]
+  promotions   Promotion[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  gameId      String
+  game        Game      @relation(fields: [gameId], references: [id])
+  sku         String    @unique
+  name        String
+  amount      Int
+  bonusAmount Int       @default(0)
+  isActive    Boolean   @default(true)
+  isFeatured  Boolean   @default(false)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  prices           ProductPrice[]
+  providerProducts ProviderProduct[]
+  orderItems       OrderItem[]
+  promotions       Promotion[]
+
+  @@index([gameId, isActive])
+}
+
+/// Price history. The single row with isActive = true is the current price.
+model ProductPrice {
+  id          String      @id @default(cuid())
+  productId   String
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  currency    String      @default("USD")
+  costMinor   Int
+  priceMinor  Int
+  pricingMode PricingMode @default(FIXED)
+  markupBps   Int?
+  isActive    Boolean     @default(true)
+  createdById String?
+  createdAt   DateTime    @default(now())
+
+  @@index([productId, isActive])
+}
+
+model Promotion {
+  id               String        @id @default(cuid())
+  code             String        @unique
+  description      String?
+  type             PromotionType
+  percentBps       Int?
+  amountMinor      Int?
+  currency         String        @default("USD")
+  minOrderMinor    Int?
+  maxRedemptions   Int?
+  redemptionCount  Int           @default(0)
+  perUserLimit     Int?
+  gameId           String?
+  game             Game?         @relation(fields: [gameId], references: [id])
+  productId        String?
+  product          Product?      @relation(fields: [productId], references: [id])
+  startsAt         DateTime?
+  endsAt           DateTime?
+  isActive         Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  orders      Order[]
+  redemptions PromotionRedemption[]
+}
+
+model PromotionRedemption {
+  id          String    @id @default(cuid())
+  promotionId String
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  orderId     String    @unique
+  order       Order     @relation(fields: [orderId], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([promotionId, userId])
+}
+
+model SavedPlayer {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id])
+  playerId  String
+  serverId  String   @default("")
+  label     String?
+  nickname  String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, gameId, playerId, serverId])
+}
+
+// ───────────────────────────── Orders & payments ─────────────────────────────
+
+model Order {
+  id               String      @id @default(cuid())
+  orderNumber      String      @unique
+  userId           String
+  user             User        @relation(fields: [userId], references: [id])
+  gameId           String
+  game             Game        @relation(fields: [gameId], references: [id])
+  status           OrderStatus @default(CREATED)
+  currency         String
+  subtotalMinor    Int
+  discountMinor    Int         @default(0)
+  totalMinor       Int
+  costMinor        Int
+  promotionId      String?
+  promotion        Promotion?  @relation(fields: [promotionId], references: [id])
+  playerId         String
+  serverId         String      @default("")
+  playerNickname   String?
+  providerId       String?
+  provider         TopUpProvider? @relation(fields: [providerId], references: [id])
+  idempotencyKey   String
+  requestHash      String
+  failureReason    String?
+  fulfillmentCount Int         @default(0)
+  paidAt           DateTime?
+  fulfilledAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  items       OrderItem[]
+  payments    Payment[]
+  attempts    FulfillmentAttempt[]
+  refunds     Refund[]
+  events      OrderEvent[]
+  redemption  PromotionRedemption?
+  tickets     SupportTicket[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([status, updatedAt])
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+model OrderItem {
+  id             String  @id @default(cuid())
+  orderId        String
+  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product @relation(fields: [productId], references: [id])
+  productName    String
+  sku            String
+  quantity       Int     @default(1)
+  unitPriceMinor Int
+  unitCostMinor  Int
+  totalMinor     Int
+}
+
+/// Immutable status history; drives the live order tracker and audit trail.
+model OrderEvent {
+  id         String       @id @default(cuid())
+  orderId    String
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  message    String?
+  actorId    String?
+  createdAt  DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String
+  order             Order         @relation(fields: [orderId], references: [id])
+  provider          String
+  providerPaymentId String?
+  status            PaymentStatus @default(PENDING)
+  amountMinor       Int
+  currency          String
+  checkoutUrl       String?
+  failureReason     String?
+  expiresAt         DateTime
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  transactions PaymentTransaction[]
+  refunds      Refund[]
+
+  @@unique([provider, providerPaymentId])
+  @@index([status, createdAt])
+  @@index([orderId])
+}
+
+model PaymentTransaction {
+  id                    String            @id @default(cuid())
+  paymentId             String
+  payment               Payment           @relation(fields: [paymentId], references: [id])
+  type                  TransactionType
+  status                TransactionStatus
+  amountMinor           Int
+  currency              String
+  providerTransactionId String?
+  rawPayload            Json?
+  createdAt             DateTime          @default(now())
+
+  @@unique([paymentId, type, providerTransactionId])
+}
+
+model Refund {
+  id               String       @id @default(cuid())
+  orderId          String
+  order            Order        @relation(fields: [orderId], references: [id])
+  paymentId        String
+  payment          Payment      @relation(fields: [paymentId], references: [id])
+  amountMinor      Int
+  currency         String
+  reason           String
+  status           RefundStatus @default(PENDING)
+  providerRefundId String?
+  failureReason    String?
+  idempotencyKey   String       @unique
+  requestedById    String?
+  requestedBy      User?        @relation(fields: [requestedById], references: [id])
+  createdAt        DateTime     @default(now())
+  processedAt      DateTime?
+
+  @@index([orderId])
+}
+
+model WebhookEvent {
+  id             String             @id @default(cuid())
+  provider       String
+  eventId        String
+  eventType      String
+  signatureValid Boolean
+  status         WebhookEventStatus @default(RECEIVED)
+  payload        Json
+  error          String?
+  receivedAt     DateTime           @default(now())
+  processedAt    DateTime?
+
+  @@unique([provider, eventId])
+  @@index([receivedAt])
+}
+
+// ───────────────────────────── Fulfillment ─────────────────────────────
+
+model TopUpProvider {
+  id                   String         @id @default(cuid())
+  code                 String         @unique
+  name                 String
+  type                 ProviderType
+  isEnabled            Boolean        @default(false)
+  /// Must only be set after commercial authorization + API documentation were verified.
+  isAuthorized         Boolean        @default(false)
+  authorizationNote    String?
+  priority             Int            @default(100)
+  baseUrl              String?
+  /// Name prefix of environment variables holding credentials (never the secrets themselves).
+  credentialsEnvPrefix String?
+  timeoutMs            Int            @default(15000)
+  health               ProviderHealth @default(UNKNOWN)
+  lastHealthCheckAt    DateTime?
+  lastError            String?
+  balanceMinor         Int?
+  balanceCurrency      String?
+  balanceCheckedAt     DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  products ProviderProduct[]
+  attempts FulfillmentAttempt[]
+  logs     ProviderApiLog[]
+  orders   Order[]
+}
+
+model ProviderProduct {
+  id          String        @id @default(cuid())
+  providerId  String
+  provider    TopUpProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  providerSku String
+  costMinor   Int
+  currency    String        @default("USD")
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([providerId, productId])
+}
+
+model FulfillmentAttempt {
+  id                String                   @id @default(cuid())
+  orderId           String
+  order             Order                    @relation(fields: [orderId], references: [id])
+  attemptNumber     Int
+  providerId        String
+  provider          TopUpProvider            @relation(fields: [providerId], references: [id])
+  status            FulfillmentAttemptStatus @default(PENDING)
+  /// Idempotency reference sent to the supplier. Stable per order so a retry can never double-deliver.
+  externalReference String
+  supplierOrderId   String?
+  requestPayload    Json
+  responsePayload   Json?
+  errorCode         String?
+  errorMessage      String?
+  durationMs        Int?
+  reconcileChecks   Int                      @default(0)
+  startedAt         DateTime                 @default(now())
+  finishedAt        DateTime?
+  reconciledAt      DateTime?
+
+  @@unique([orderId, attemptNumber])
+  @@index([status, startedAt])
+}
+
+model ProviderApiLog {
+  id              String        @id @default(cuid())
+  providerId      String
+  provider        TopUpProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  operation       String
+  orderId         String?
+  success         Boolean
+  statusCode      Int?
+  durationMs      Int
+  requestSummary  Json?
+  responseSummary Json?
+  errorMessage    String?
+  createdAt       DateTime      @default(now())
+
+  @@index([providerId, createdAt])
+}
+
+// ───────────────────────────── Support, notifications, audit ─────────────────────────────
+
+model SupportTicket {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id])
+  orderId   String?
+  order     Order?         @relation(fields: [orderId], references: [id])
+  subject   String
+  status    TicketStatus   @default(OPEN)
+  priority  TicketPriority @default(NORMAL)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  messages SupportTicketMessage[]
+
+  @@index([status, updatedAt])
+  @@index([userId])
+}
+
+model SupportTicketMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id])
+  body      String
+  isStaff   Boolean       @default(false)
+  createdAt DateTime      @default(now())
+
+  @@index([ticketId, createdAt])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([actorId])
+}

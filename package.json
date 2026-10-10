@@ -1,0 +1,40 @@
+{
+  "name": "donat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Game top-up storefront with mock payments and mock fulfillment (real integrations disabled by default).",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "postinstall": "npm run build -w @donat/shared && npm run prisma:generate -w @donat/api",
+    "db:start": "node scripts/dev-db.mjs",
+    "db:migrate": "npm run prisma:migrate -w @donat/api",
+    "db:deploy": "npm run prisma:deploy -w @donat/api",
+    "db:seed": "npm run seed -w @donat/api",
+    "db:reset": "npm run prisma:reset -w @donat/api",
+    "dev": "concurrently -k -n api,web -c blue,magenta \"npm run dev -w @donat/api\" \"npm run dev -w @donat/web\"",
+    "dev:all": "concurrently -k -n db,api,web -c gray,blue,magenta \"npm run db:start\" \"wait-on tcp:127.0.0.1:5433 && npm run dev -w @donat/api\" \"npm run dev -w @donat/web\"",
+    "build": "npm run build -w @donat/shared && npm run build -w @donat/api && npm run build -w @donat/web",
+    "start:api": "npm run start -w @donat/api",
+    "start:worker": "npm run start:worker -w @donat/api",
+    "start:web": "npm run start -w @donat/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "concurrently": "9.2.5",
+    "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.12.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.0",
+    "wait-on": "8.0.4"
+  }
+}
