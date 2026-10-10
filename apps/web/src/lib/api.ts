@@ -21,7 +21,10 @@ async function ensureCsrf(): Promise<string> {
   const existing = readCookie('csrf_token');
   if (existing) return existing;
   const res = await fetch('/api/auth/csrf', { credentials: 'include' });
-  const body = (await res.json()) as { csrfToken: string };
+  const body = (await res.json().catch(() => null)) as { csrfToken?: string } | null;
+  if (!res.ok || !body?.csrfToken) {
+    throw new ApiError(res.ok ? 502 : res.status, 'BAD_RESPONSE', 'The server is unavailable right now. Please try again shortly.');
+  }
   return body.csrfToken;
 }
 
@@ -74,7 +77,15 @@ export async function api<T>(path: string, opts: ApiOptions = {}): Promise<T> {
   }
 
   const text = await res.text();
-  const data = text ? (JSON.parse(text) as unknown) : null;
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      // Not our API's JSON (e.g. a platform error page when the backend is down).
+      throw new ApiError(res.ok ? 502 : res.status, 'BAD_RESPONSE', 'The server is unavailable right now. Please try again shortly.');
+    }
+  }
   if (!res.ok) {
     const err = (data as { error?: { code?: string; message?: string; details?: unknown } } | null)?.error;
     throw new ApiError(res.status, err?.code ?? 'ERROR', err?.message ?? `Request failed (${res.status})`, err?.details);
