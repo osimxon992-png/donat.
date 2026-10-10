@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import pino from 'pino';
 import request from 'supertest';
 import type TestAgent from 'supertest/lib/agent';
-import { createApp } from '../src/app';
+import { createApp } from '../src/create-app';
 import { loadEnv } from '../src/config/env';
 import { createContainer, type Container } from '../src/container';
 import { hashPassword } from '../src/lib/crypto';

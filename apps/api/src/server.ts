@@ -1,5 +1,5 @@
 import express, { type Express } from 'express';
-import { createApp } from './app';
+import { createApp } from './create-app';
 import { loadEnv, type Env } from './config/env';
 import { createContainer, type Container } from './container';
 import { startScheduler } from './scheduler';
