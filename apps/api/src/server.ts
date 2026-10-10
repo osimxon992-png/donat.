@@ -1,10 +1,35 @@
+import express from 'express';
 import { createApp } from './app';
 import { loadEnv } from './config/env';
 import { createContainer } from './container';
 import { startScheduler } from './scheduler';
 
+/**
+ * On Vercel a crashed function only yields a plain-text platform error page. Instead, keep
+ * serving JSON so the web app shows a clean error and /api/health names what is missing.
+ * Only variable names are reported, never values.
+ */
+function serveMisconfigured(err: unknown) {
+  const problems = (err instanceof Error ? err.message : String(err)).split('\n').slice(1).map((l) => l.trim()).filter(Boolean);
+  console.error(err);
+  const app = express();
+  app.get('/api/health', (_req, res) => {
+    res.status(503).json({ status: 'misconfigured', problems });
+  });
+  app.use((_req, res) => {
+    res.status(503).json({ error: { code: 'MISCONFIGURED', message: 'The store is temporarily unavailable. Please try again later.' } });
+  });
+  app.listen(Number(process.env.PORT) || 4000);
+}
+
 async function main() {
-  const env = loadEnv();
+  let env: ReturnType<typeof loadEnv>;
+  try {
+    env = loadEnv();
+  } catch (err) {
+    if (process.env.VERCEL) return serveMisconfigured(err);
+    throw err;
+  }
   const c = createContainer(env);
   const app = createApp(c);
 

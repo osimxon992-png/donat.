@@ -31,17 +31,11 @@ function LoginForm() {
   return (
     <AuthShell
       eyebrow="Sign in"
-      title={
-        <>
-          Welcome
-          <br />
-          back.
-        </>
-      }
+      title="Welcome back"
       aside={
         <>
           <p>Your saved player IDs and order history are waiting.</p>
-          <div className="mt-8 border-t border-dashed border-ink/25 pt-4 font-mono text-xs leading-6">
+          <div className="mt-5 rounded-lg border-[2.5px] border-dashed border-ink bg-white px-4 py-3 text-left text-xs leading-6 font-medium">
             <p className="text-muted">Demo accounts</p>
             <p>customer@donat.local · Customer-2026</p>
             <p>admin@donat.local · ChangeMe-Admin-2026</p>

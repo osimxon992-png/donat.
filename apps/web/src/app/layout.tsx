@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from 'next';
-import { Bricolage_Grotesque, Instrument_Sans, JetBrains_Mono } from 'next/font/google';
+import { Bangers, JetBrains_Mono, Onest } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import { AuthProvider } from '@/lib/auth';
 import './globals.css';
 
-const heading = Bricolage_Grotesque({ subsets: ['latin'], variable: '--font-heading', display: 'swap' });
-const body = Instrument_Sans({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
+const comic = Bangers({ subsets: ['latin'], weight: '400', variable: '--font-comic', display: 'swap' });
+const body = Onest({ subsets: ['latin', 'cyrillic'], variable: '--font-body', display: 'swap' });
 const code = JetBrains_Mono({ subsets: ['latin'], variable: '--font-code', display: 'swap', weight: ['400', '500'] });
 
 export const metadata: Metadata = {
@@ -17,21 +17,18 @@ export const metadata: Metadata = {
   applicationName: 'Donat',
 };
 
-export const viewport: Viewport = { themeColor: '#f3f0e8', width: 'device-width', initialScale: 1 };
+export const viewport: Viewport = { themeColor: '#ffd21f', width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${heading.variable} ${body.variable} ${code.variable}`}>
+    <html lang="en" className={`${comic.variable} ${body.variable} ${code.variable}`}>
       <body className="flex min-h-screen flex-col">
         <AuthProvider>
-          <div className="bg-ink text-paper">
-            <p className="mx-auto flex max-w-6xl items-center gap-2 px-5 py-1.5 font-mono text-[11px] tracking-wide">
-              <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-              DEMO STORE — payments and deliveries are simulated. Nothing is charged, nothing is sent.
-            </p>
+          <div className="border-b-[3px] border-ink bg-ink text-center text-xs font-semibold text-pop">
+            <p className="mx-auto max-w-[1400px] px-5 py-1.5">Demo store: payments and deliveries are simulated. Nothing is charged and nothing is sent.</p>
           </div>
           <Header />
-          <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10">{children}</main>
+          <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">{children}</main>
           <Footer />
         </AuthProvider>
       </body>

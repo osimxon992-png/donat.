@@ -31,11 +31,11 @@ export function OperatorFinder({ operators }: { operators: GameSummary[] }) {
     : undefined;
 
   return (
-    <div className="card p-5">
-      <p className="eyebrow">Whose number is this?</p>
-      <p className="mt-1 text-sm text-muted">Type any Uzbek number in any format — we’ll tell you the operator.</p>
+    <div className="card p-6">
+      <p className="font-display text-3xl tracking-wider uppercase">Which operator is this?</p>
+      <p className="mt-1 text-sm font-medium text-muted">Type any Uzbek number in any format — we’ll tell you the operator.</p>
       <input
-        className="input mt-4 font-mono"
+        className="input mt-4 h-12 text-base"
         inputMode="tel"
         placeholder="+998 90 123 45 67"
         value={raw}
@@ -48,10 +48,10 @@ export function OperatorFinder({ operators }: { operators: GameSummary[] }) {
         ) : match ? (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p>
-              <span className="font-semibold">{match.name}</span> <span className="font-mono text-muted">· {phone}</span>
+              <span className="font-semibold">{match.name}</span> <span className="text-muted">· +{phone}</span>
             </p>
             <Link href={`/games/${match.slug}`} className="btn-primary">
-              Top up {match.name} →
+              Top up {match.name}
             </Link>
           </div>
         ) : (

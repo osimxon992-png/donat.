@@ -16,8 +16,8 @@ export function SideNav({ items, title }: { items: NavItem[]; title: string }) {
 
   return (
     <nav className="lg:sticky lg:top-24 lg:self-start">
-      <p className="eyebrow mb-3 hidden lg:block">{title}</p>
-      <ul className="-mx-5 flex gap-1 overflow-x-auto border-b border-ink/10 px-5 pb-0 lg:mx-0 lg:flex-col lg:gap-0 lg:border-b-0 lg:border-l lg:px-0">
+      <p className="mb-3 hidden px-3 font-display text-2xl tracking-wider uppercase lg:block">{title}</p>
+      <ul className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:px-0">
         {visible.map((item) => {
           const active = isActive(item.href);
           return (
@@ -25,8 +25,8 @@ export function SideNav({ items, title }: { items: NavItem[]; title: string }) {
               <Link
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
-                className={`-mb-px block border-b-2 px-3 py-2.5 text-sm whitespace-nowrap transition-colors lg:mb-0 lg:-ml-px lg:border-b-0 lg:border-l-2 lg:py-1.5 lg:pl-4 ${
-                  active ? 'border-ink font-semibold text-text' : 'border-transparent text-muted hover:text-text'
+                className={`block rounded-xl px-3 py-2 text-sm whitespace-nowrap transition-colors ${
+                  active ? 'border-[2.5px] border-ink bg-pop font-bold text-ink shadow-comic-sm' : 'border-[2.5px] border-transparent font-semibold text-muted hover:text-ink'
                 }`}
               >
                 {item.label}

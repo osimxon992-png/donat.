@@ -52,16 +52,16 @@ function MockPay() {
 
   return (
     <div className="mx-auto max-w-[420px] pt-4">
-      <div className="overflow-hidden rounded-[12px] border border-ink/15 bg-white shadow-[0_24px_60px_-30px_rgba(22,21,19,0.45)]">
-        <div className="flex items-center justify-between border-b border-ink/10 px-6 py-4">
-          <span className="font-display text-lg font-bold tracking-tight">
+      <div className="card overflow-hidden">
+        <div className="flex items-center justify-between border-b-[3px] border-ink bg-pop px-6 py-4">
+          <span className="font-display text-2xl tracking-wider">
             test<span className="text-info">pay</span>
           </span>
-          <span className="rounded-sm bg-warn/10 px-2 py-0.5 font-mono text-[10px] tracking-wider text-warn uppercase">Sandbox</span>
+          <span className="rounded-full bg-warn/12 px-2.5 py-1 text-xs font-medium text-warn">Sandbox</span>
         </div>
         <div className="px-6 py-6">
           <p className="text-sm text-muted">Pay Donat</p>
-          <p className="mt-1 font-display text-5xl font-bold tracking-tight tabular-nums">{money(p.amountMinor, p.currency)}</p>
+          <p className="mt-1 font-display text-6xl tracking-wide tabular-nums">{money(p.amountMinor, p.currency)}</p>
           <div className="mt-6 space-y-2">
             <ReceiptRow label="Order" value={p.order.orderNumber} />
             <ReceiptRow label="Item" value={`${p.order.productName ?? ''} · ${p.order.gameName}`} />
@@ -80,7 +80,7 @@ function MockPay() {
           ) : (
             <div className="mt-8 space-y-3">
               <ErrorBox message={actionError} />
-              <button className="btn h-12 w-full bg-info text-white hover:bg-info/90" disabled={!!pending} onClick={() => complete('success')}>
+              <button className="btn h-12 w-full bg-cyan text-ink" disabled={!!pending} onClick={() => complete('success')}>
                 {pending === 'success' && <Spinner />} Approve payment
               </button>
               <button className="btn-secondary w-full" disabled={!!pending} onClick={() => complete('failure')}>
@@ -89,7 +89,7 @@ function MockPay() {
             </div>
           )}
         </div>
-        <p className="border-t border-ink/10 bg-bg/60 px-6 py-3 text-xs leading-relaxed text-muted">
+        <p className="border-t-[3px] border-ink bg-surface-2 px-6 py-3 text-xs leading-relaxed text-muted">
           Simulated gateway — no card details are requested and no money moves. Your choice is sent to the store as a signed webhook.
         </p>
       </div>

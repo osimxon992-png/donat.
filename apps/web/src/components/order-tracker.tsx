@@ -21,17 +21,17 @@ export function OrderTracker({ status, timeline }: { status: OrderStatus; timeli
         const last = i === ORDER_PROGRESS_STEPS.length - 1;
         return (
           <li key={step.key} className="relative flex gap-4 pb-6 last:pb-0">
-            {!last && <span className={`absolute top-6 left-[11px] h-[calc(100%-24px)] w-px ${done ? 'bg-ink' : 'bg-ink/15'}`} />}
+            {!last && <span className={`absolute top-6 left-[11px] h-[calc(100%-24px)] w-px ${done ? 'bg-ink' : 'bg-ink/20'}`} />}
             <span
               className={`relative z-10 grid h-6 w-6 shrink-0 place-items-center rounded-full border text-[11px] ${
-                done ? 'border-ink bg-ink text-paper' : active ? 'border-accent bg-surface' : 'border-ink/20 bg-surface text-muted'
+                done ? 'border-ink bg-ok text-white' : active ? 'border-ink bg-pop' : 'border-ink/30 bg-white text-muted'
               }`}
             >
               {done ? '✓' : active ? <span className="h-2 w-2 animate-pulse rounded-full bg-accent" /> : null}
             </span>
             <div className="-mt-0.5 flex flex-1 items-baseline justify-between gap-4">
               <span className={`text-[15px] ${done || active ? 'font-semibold text-text' : 'text-muted'}`}>{step.label}</span>
-              {at && <span className="font-mono text-xs text-muted">{dateTime(at)}</span>}
+              {at && <span className="text-xs text-muted">{dateTime(at)}</span>}
             </div>
           </li>
         );

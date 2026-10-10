@@ -35,14 +35,16 @@ const ITEMS: [string, string][] = [
 
 export function Faq({ limit }: { limit?: number }) {
   return (
-    <div className="divide-y divide-ink/10 border-y border-ink/10">
+    <div className="space-y-2">
       {ITEMS.slice(0, limit).map(([q, a]) => (
-        <details key={q} className="group py-4">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-6 font-display text-lg font-semibold tracking-tight [&::-webkit-details-marker]:hidden">
+        <details key={q} className="group rounded-[10px] border-[3px] border-ink bg-white px-5 py-4 shadow-comic-sm open:bg-pop/25">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-base font-bold [&::-webkit-details-marker]:hidden">
             {q}
-            <span className="font-mono text-xl font-normal text-muted transition-transform group-open:rotate-45">+</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="shrink-0 text-ink transition-transform group-open:rotate-180" aria-hidden>
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </summary>
-          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">{a}</p>
+          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-muted">{a}</p>
         </details>
       ))}
     </div>

@@ -23,13 +23,13 @@ function FormatCheck({ item }: { item: GameSummary }) {
   return (
     <div className="flex items-center gap-2">
       <input
-        className="input h-9 font-mono text-xs"
+        className="input h-10 text-sm"
         placeholder={`Paste your ${item.playerIdLabel.toLowerCase()}`}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         aria-label={`Check a ${item.name} ${item.playerIdLabel}`}
       />
-      <span className={`w-20 shrink-0 font-mono text-[11px] ${ok ? 'text-ok' : ok === false ? 'text-bad' : 'text-muted'}`} aria-live="polite">
+      <span className={`w-24 shrink-0 text-xs ${ok ? 'text-ok' : ok === false ? 'text-bad' : 'text-muted'}`} aria-live="polite">
         {ok ? '✓ looks right' : ok === false ? '✗ wrong format' : ''}
       </span>
     </div>
@@ -61,17 +61,17 @@ export function IdGuide() {
         if (!section.length) return null;
         return (
           <section key={cat}>
-            <h2 className="mb-4 border-b border-ink/10 pb-3 text-2xl font-bold">{CATEGORY_LABELS[cat].title}</h2>
-            <ul className="divide-y divide-ink/10">
+            <h2 className="mb-5 inline-block -rotate-1 border-[3px] border-ink bg-ink px-4 pt-1.5 pb-1 text-3xl tracking-wider text-pop uppercase shadow-comic-sm">{CATEGORY_LABELS[cat].title}</h2>
+            <ul className="space-y-4">
               {section.map((g) => (
-                <li key={g.id} className="grid gap-4 py-5 md:grid-cols-[48px_1fr_320px] md:items-center">
-                  <div className="hidden h-12 w-12 overflow-hidden rounded-[6px] md:block">
+                <li key={g.id} className="card grid gap-4 p-4 md:grid-cols-[48px_1fr_320px] md:items-center">
+                  <div className="hidden h-12 w-12 overflow-hidden rounded-md border-[2.5px] border-ink md:block">
                     <GameArt name={g.name} slug={g.slug} imageUrl={g.imageUrl} variant="thumb" />
                   </div>
                   <div>
                     <p className="flex flex-wrap items-baseline gap-x-3">
-                      <span className="font-display text-lg font-semibold">{g.name}</span>
-                      <span className="font-mono text-xs text-muted">{g.playerIdLabel}</span>
+                      <span className="font-display text-2xl tracking-wide">{g.name}</span>
+                      <span className="text-xs text-muted">{g.playerIdLabel}</span>
                     </p>
                     <p className="mt-1 text-sm text-muted">{g.playerIdHelp ?? 'Shown on your profile.'}</p>
                     <Link href={`/games/${g.slug}`} className="link mt-2 inline-block text-sm">

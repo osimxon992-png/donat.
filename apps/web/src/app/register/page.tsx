@@ -59,7 +59,7 @@ function RegisterForm() {
         <Field label="Password">
           <input className="input h-11" type="password" required minLength={10} autoComplete="new-password" value={form.password} onChange={set('password')} />
         </Field>
-        <ul className="-mt-2 space-y-1 font-mono text-[11px]">
+        <ul className="-mt-2 space-y-1 text-xs">
           <li className={longEnough ? 'text-ok' : 'text-muted'}>{longEnough ? '✓' : '○'} at least 10 characters</li>
           <li className={mixed ? 'text-ok' : 'text-muted'}>{mixed ? '✓' : '○'} letters and numbers</li>
         </ul>

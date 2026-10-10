@@ -1,15 +1,19 @@
 import Link from 'next/link';
+import { LogoMark } from './logo';
 
 export function Footer() {
   return (
-    <footer className="mt-16 border-t border-ink/10 bg-ink text-paper">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-14 pb-8 md:grid-cols-[2fr_1fr_1fr_1fr]">
+    <footer className="mt-24 border-t-4 border-ink bg-ink text-white">
+      <div className="mx-auto grid max-w-[1400px] gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.6fr_1fr_1fr_1fr] lg:px-8">
         <div>
-          <p className="font-display text-5xl leading-none font-extrabold tracking-[-0.05em]">
-            donat<span className="text-accent">.</span>
-          </p>
-          <p className="mt-4 max-w-xs text-sm text-paper/60">
-            Top-ups for games, apps and phones. We check the account before you pay and you can watch the delivery happen.
+          <Link href="/" className="inline-flex items-center gap-1.5">
+            <LogoMark size={40} />
+            <span className="font-display text-4xl leading-none tracking-wider text-pop">
+              DON<span className="text-accent">AT!</span>
+            </span>
+          </Link>
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/70">
+            Top-ups for games, apps and phones in Uzbekistan. The account is checked before you pay, and you can follow the delivery live.
           </p>
         </div>
         <FooterCol
@@ -24,9 +28,11 @@ export function Footer() {
         <FooterCol title="Help" links={[['/guides', 'Where is my ID?'], ['/help', 'FAQ'], ['/account/support', 'Contact support'], ['/forgot-password', 'Reset password']]} />
         <FooterCol title="Account" links={[['/login', 'Sign in'], ['/register', 'Create account'], ['/account/settings', 'Settings']]} />
       </div>
-      <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-3 border-t border-paper/10 px-5 py-5 font-mono text-[11px] text-paper/45">
-        <span>© {new Date().getFullYear()} Donat</span>
-        <span>Not affiliated with any game publisher, app or mobile operator. Names belong to their owners.</span>
+      <div className="border-t-2 border-white/15">
+        <div className="mx-auto flex max-w-[1400px] flex-wrap justify-between gap-3 px-4 py-5 text-xs text-white/50 sm:px-6 lg:px-8">
+          <span>© {new Date().getFullYear()} Donat</span>
+          <span>Not affiliated with any game publisher, app or mobile operator. Names belong to their owners.</span>
+        </div>
       </div>
     </footer>
   );
@@ -35,11 +41,11 @@ export function Footer() {
 function FooterCol({ title, links }: { title: string; links: [string, string][] }) {
   return (
     <div>
-      <p className="font-mono text-[11px] tracking-[0.14em] text-paper/45 uppercase">{title}</p>
-      <ul className="mt-4 space-y-2 text-sm">
+      <p className="font-display text-2xl tracking-wider text-pop uppercase">{title}</p>
+      <ul className="mt-3 space-y-2.5 text-sm">
         {links.map(([href, label]) => (
           <li key={href}>
-            <Link href={href} className="text-paper/80 hover:text-accent">
+            <Link href={href} className="font-medium text-white/80 transition-colors hover:text-pop">
               {label}
             </Link>
           </li>

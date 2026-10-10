@@ -1,53 +1,63 @@
 @import 'tailwindcss';
 
 /*
- * Donat design tokens.
- * Warm paper background, near-black ink, one signal colour used sparingly.
- * Fonts are injected by next/font in layout.tsx as CSS variables.
+ * Donat design tokens — comic book.
+ * Newsprint paper, heavy ink outlines, hard offset shadows and flat primary colours.
+ * `ink` is the outline/text black, `paper` the page colour, `pop` the comic yellow.
+ * Fonts come from next/font in layout.tsx (Bangers for display, Onest for reading).
  */
 @theme {
-  --color-bg: #f3f0e8;
-  --color-surface: #fffdf8;
-  --color-surface-2: #e9e4d8;
-  --color-border: #d8d1c1;
-  --color-text: #161513;
-  --color-muted: #6f6a60;
-  --color-ink: #161513;
-  --color-paper: #f3f0e8;
-  --color-accent: #ff4f12;
-  --color-accent-strong: #e03f06;
-  --color-ok: #137a47;
-  --color-warn: #a85a00;
-  --color-bad: #c42b1c;
-  --color-info: #1f45d6;
+  --color-bg: #fff3d1;
+  --color-surface: #ffffff;
+  --color-surface-2: #fff8e6;
+  --color-border: #e3d2a4;
+  --color-text: #141414;
+  --color-muted: #5b5446;
+  --color-ink: #141414;
+  --color-paper: #fff3d1;
+  --color-accent: #e8262b;
+  --color-accent-strong: #c41a1f;
+  --color-on-accent: #ffffff;
+  --color-pop: #ffd21f;
+  --color-cyan: #19b4ff;
+  --color-magenta: #ff3fa4;
+  --color-ok: #12924f;
+  --color-warn: #c86800;
+  --color-bad: #d91c1c;
+  --color-info: #0a6fd6;
 
   --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-comic), Impact, 'Arial Black', sans-serif;
   --font-mono: var(--font-code), ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --radius-card: 10px;
+  --shadow-comic: 5px 5px 0 0 var(--color-ink);
+  --shadow-comic-sm: 3px 3px 0 0 var(--color-ink);
+  --shadow-comic-lg: 8px 8px 0 0 var(--color-ink);
 }
 
 html {
   color-scheme: light;
 }
 
+/* Newsprint: warm paper with a faint halftone dot screen. */
 body {
-  background: var(--color-bg);
+  background-color: var(--color-bg);
+  background-image: radial-gradient(rgba(20, 20, 20, 0.07) 1px, transparent 1.2px);
+  background-size: 14px 14px;
   color: var(--color-text);
   font-family: var(--font-sans);
-  font-feature-settings: 'ss01', 'cv11';
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: #fff;
+  background: var(--color-pop);
+  color: var(--color-ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 3px solid var(--color-cyan);
   outline-offset: 2px;
 }
 
@@ -55,43 +65,58 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
+/* Comic panel: white, heavy outline, hard shadow. */
 @utility card {
-  @apply rounded-[var(--radius-card)] border border-border bg-surface;
+  @apply rounded-[var(--radius-card)] border-[3px] border-ink bg-surface shadow-comic;
+}
+@utility panel {
+  @apply rounded-[var(--radius-card)] border-[3px] border-ink shadow-comic;
 }
 @utility btn {
-  @apply inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40;
+  @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg border-[3px] border-ink px-5 font-display text-lg tracking-wider whitespace-nowrap uppercase shadow-comic-sm transition-all duration-100 hover:-translate-x-px hover:-translate-y-px hover:shadow-comic active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-comic-sm disabled:hover:translate-x-0 disabled:hover:translate-y-0;
 }
-/* Ink button: the default call to action. */
+/* Default call to action. */
 @utility btn-primary {
-  @apply btn bg-ink text-paper hover:bg-accent;
+  @apply btn bg-pop text-ink;
 }
-/* Signal button: reserved for the one money action on a page (pay / buy). */
+/* The one money action on a page (pay / buy). */
 @utility btn-accent {
-  @apply btn bg-accent text-white hover:bg-accent-strong;
+  @apply btn bg-accent text-white;
 }
 @utility btn-secondary {
-  @apply btn border border-ink/20 bg-surface text-text hover:border-ink;
+  @apply btn bg-white text-ink;
 }
 @utility btn-danger {
-  @apply btn border border-bad/30 bg-surface text-bad hover:border-bad hover:bg-bad hover:text-white;
+  @apply btn bg-white text-bad;
 }
 @utility btn-ghost {
-  @apply btn px-3 font-medium text-muted hover:text-text;
+  @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold text-ink transition-colors hover:bg-pop/60;
 }
 @utility input {
-  @apply h-10 w-full rounded-md border border-ink/20 bg-surface px-3 text-sm text-text transition-colors outline-none placeholder:text-muted/70 hover:border-ink/40 focus:border-ink disabled:opacity-60;
+  @apply h-11 w-full rounded-lg border-[2.5px] border-ink bg-white px-3.5 text-sm text-text transition-shadow outline-none placeholder:text-muted/70 focus:shadow-comic-sm disabled:opacity-60;
 }
 @utility label {
-  @apply mb-1.5 block font-mono text-[11px] font-medium tracking-wider text-muted uppercase;
+  @apply mb-1.5 block text-[13px] font-bold text-ink;
 }
 @utility eyebrow {
-  @apply font-mono text-[11px] font-medium tracking-[0.14em] text-muted uppercase;
+  @apply font-display text-base tracking-wider text-accent uppercase;
 }
 @utility link {
-  @apply underline decoration-ink/30 underline-offset-4 transition-colors hover:decoration-accent;
+  @apply font-bold text-ink underline decoration-accent decoration-[3px] underline-offset-4 transition-colors hover:text-accent;
+}
+/* Halftone dot overlay for art. */
+@utility halftone {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.28) 1.4px, transparent 1.6px);
+  background-size: 9px 9px;
+}
+@utility halftone-light {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1.4px, transparent 1.6px);
+  background-size: 9px 9px;
 }
 
 textarea.input {
@@ -100,14 +125,14 @@ textarea.input {
 
 select.input {
   @apply cursor-pointer appearance-none bg-no-repeat pr-9;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23161513' stroke-width='1.5'%3E%3Cpath d='M2 4.5l4 4 4-4'/%3E%3C/svg%3E");
-  background-position: right 0.75rem center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23141414' stroke-width='2.2'%3E%3Cpath d='M2 4.5l4 4 4-4'/%3E%3C/svg%3E");
+  background-position: right 0.85rem center;
 }
 
 input[type='checkbox'] {
-  accent-color: var(--color-ink);
-  width: 1rem;
-  height: 1rem;
+  accent-color: var(--color-accent);
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 @layer components {
@@ -115,27 +140,112 @@ input[type='checkbox'] {
     @apply w-full text-left text-sm;
   }
   .table th {
-    @apply border-b border-ink/15 px-3 py-2.5 font-mono text-[11px] font-medium tracking-wider text-muted uppercase;
+    @apply border-b-[3px] border-ink px-3 py-3 font-display text-base font-normal tracking-wider text-ink uppercase;
   }
   .table td {
-    @apply border-b border-border/70 px-3 py-3 align-middle;
+    @apply border-b border-border px-3 py-3 align-middle;
   }
   .table tbody tr:last-child td {
     @apply border-b-0;
   }
   .table tbody tr:hover {
-    @apply bg-surface-2/40;
+    @apply bg-pop/15;
   }
 
-  /* Dashed rule used on receipts and summaries. */
+  /* Divider used in summaries. */
   .rule-dashed {
-    border-top: 1px dashed color-mix(in srgb, var(--color-ink) 30%, transparent);
+    border-top: 2.5px dashed var(--color-ink);
   }
 
-  /* Perforated receipt edge. */
+  /* Legacy decoration, intentionally empty. */
   .receipt-edge {
-    background:
-      radial-gradient(circle at 6px -2px, transparent 6px, var(--color-surface) 6.5px) top left / 12px 8px repeat-x;
-    height: 8px;
+    display: none;
+  }
+
+  /* Starburst ("POW!") badge shape. */
+  .burst {
+    clip-path: polygon(50% 0%, 61% 18%, 82% 8%, 79% 30%, 100% 35%, 84% 52%, 98% 70%, 76% 72%, 74% 94%, 56% 82%, 42% 100%, 34% 80%, 12% 90%, 16% 68%, 0% 58%, 16% 44%, 4% 24%, 26% 24%, 26% 2%, 42% 16%);
+  }
+
+  /* Speech bubble with a tail at the bottom left. */
+  .bubble {
+    position: relative;
+  }
+  .bubble::after {
+    content: '';
+    position: absolute;
+    left: 32px;
+    bottom: -22px;
+    width: 26px;
+    height: 22px;
+    background: var(--color-ink);
+    clip-path: polygon(0 0, 100% 0, 10% 100%);
+  }
+  .bubble::before {
+    content: '';
+    position: absolute;
+    left: 36px;
+    bottom: -14px;
+    width: 18px;
+    height: 16px;
+    background: var(--bubble-bg, #fff);
+    clip-path: polygon(0 0, 100% 0, 8% 100%);
+    z-index: 1;
+  }
+}
+
+/* Comic text with an ink outline, for titles over artwork. */
+.ink-outline {
+  -webkit-text-stroke: 2px var(--color-ink);
+  paint-order: stroke fill;
+  text-shadow: 3px 3px 0 var(--color-ink);
+}
+
+@keyframes slide-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.6) rotate(-8deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* Horizontal shelves: hide the scrollbar, keep scrolling. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -34,7 +34,7 @@ export function TicketThread({ ticket, replyPath, onChange }: { ticket: TicketDe
       <ul className="space-y-3">
         {ticket.messages.map((m) => (
           <li key={m.id} className={`flex ${m.isStaff ? 'justify-start' : 'justify-end'}`}>
-            <div className={`max-w-[85%] rounded-[10px] px-4 py-3 ${m.isStaff ? 'border border-ink/10 bg-surface' : 'bg-ink text-paper'}`}>
+            <div className={`max-w-[85%] rounded-2xl border-[3px] border-ink px-4 py-3 shadow-comic-sm ${m.isStaff ? 'bg-white' : 'bg-cyan/30'}`}>
               <p className="mb-1 text-xs opacity-60">
                 {m.isStaff ? `${m.author.name} (Support)` : m.author.name} · {dateTime(m.createdAt)}
               </p>
