@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@donat/shared": "*",
+    "@fontsource-variable/onest": "5.3.1",
+    "@fontsource/bangers": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
     "next": "15.5.26",
     "react": "19.1.9",
     "react-dom": "19.1.9"

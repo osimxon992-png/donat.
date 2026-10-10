@@ -4,7 +4,8 @@
  * Donat design tokens — comic book.
  * Newsprint paper, heavy ink outlines, hard offset shadows and flat primary colours.
  * `ink` is the outline/text black, `paper` the page colour, `pop` the comic yellow.
- * Fonts come from next/font in layout.tsx (Bangers for display, Onest for reading).
+ * Fonts are self-hosted via @fontsource imports in layout.tsx (Bangers for display, Onest for reading),
+ * so builds never depend on reaching Google Fonts.
  */
 @theme {
   --color-bg: #fff3d1;
@@ -26,9 +27,9 @@
   --color-bad: #d91c1c;
   --color-info: #0a6fd6;
 
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: var(--font-comic), Impact, 'Arial Black', sans-serif;
-  --font-mono: var(--font-code), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-sans: 'Onest Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Bangers', Impact, 'Arial Black', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --radius-card: 10px;
   --shadow-comic: 5px 5px 0 0 var(--color-ink);
