@@ -58,7 +58,8 @@ const schema = z.object({
   ENABLE_REAL_FULFILLMENT: bool(false),
 
   // Uploads
-  UPLOAD_DIR: z.string().default(path.join(API_ROOT, 'uploads')),
+  // Vercel's filesystem is read-only except /tmp (which is ephemeral; use object storage for real uploads).
+  UPLOAD_DIR: z.string().default(process.env.VERCEL ? '/tmp/donat-uploads' : path.join(API_ROOT, 'uploads')),
   MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(2 * 1024 * 1024),
 
   // Rate limiting

@@ -34,7 +34,8 @@ export interface ContainerOptions {
 }
 
 export function createContainer(env: Env, opts: ContainerOptions = {}) {
-  const logger = opts.logger ?? createLogger(env.LOG_LEVEL, env.NODE_ENV === 'development');
+  // pino-pretty runs in a worker thread and is a devDependency, so never use it on Vercel.
+  const logger = opts.logger ?? createLogger(env.LOG_LEVEL, env.NODE_ENV === 'development' && !process.env.VERCEL);
   const prisma = opts.prisma ?? new PrismaClient();
   const redis = env.REDIS_URL ? new IORedis(env.REDIS_URL, { maxRetriesPerRequest: 2, lazyConnect: false }) : undefined;
   const queue: JobQueue = opts.queue ?? (env.REDIS_URL ? new BullMqQueue(env.REDIS_URL, logger) : new InMemoryQueue(logger));
